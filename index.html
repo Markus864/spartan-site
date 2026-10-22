@@ -16,7 +16,7 @@
 <meta property="og:image" content="https://spartanmechatronics.com/assets/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Spartan Mechatronics: a simulated palletizer cell in a control-panel window, with the line Faster PLC work. Tested first.">
+<meta property="og:image:alt" content="Spartan Mechatronics: a simulated palletizer cell in a control-panel window, with the line Remote PLC programming, tested first.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Remote PLC programming, code review and troubleshooting">
 <meta name="twitter:description" content="Contract PLC work for integrators and plants, done faster with AI and tested on a simulated machine before it reaches yours. Siemens TIA Portal, STEP 7, Allen-Bradley, Ignition.">
@@ -111,7 +111,9 @@ p{margin:0;text-wrap:pretty}
 .hero{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap);padding:14px var(--m) 0}
 .hero .lead{grid-column:1/8;background:var(--plate);border:3px solid var(--black);border-radius:6px;padding:var(--s-5);display:flex;flex-direction:column;justify-content:space-between;gap:30px;min-height:min(78svh,760px)}
 .hero .ident{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.hero h1{font-size:var(--step-display);line-height:.9;letter-spacing:0}
+.hero .lead{container-type:inline-size}
+/* the first line is 9.94em wide in Barlow Condensed 700: 9.8cqi keeps it on one line at any width */
+.hero h1{font-size:min(var(--step-display),9.8cqi);line-height:.9;letter-spacing:0}
 .hero h1 .l{display:block;white-space:nowrap}
 .hero h1 .l2{color:var(--brand)}
 .hero .sub{font-size:var(--step-lead);line-height:1.35;max-width:40ch}
@@ -358,7 +360,6 @@ footer .big{display:block;width:min(100%,980px);height:auto}
   .door-bar nav{display:none}
   .door-bar .in{grid-template-columns:1fr auto}
   .door-bar .logo img{height:46px}
-  .hero h1 .l{white-space:normal}
   .strip{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr}
   .sched .row{grid-template-columns:56px 1fr}
@@ -421,7 +422,7 @@ footer .big{display:block;width:min(100%,980px);height:auto}
 <main id="main">
 <div class="hero" id="top">
   <div class="lead" data-enter>
-    <h1><span class="l">Faster PLC work.</span><span class="l l2">Tested first.</span></h1>
+    <h1><span class="l">Remote PLC programming,</span><span class="l l2">tested first.</span></h1>
     <p class="sub">I'm a mechatronics technician with 12 years on automated lines. AI helps me read, write and document PLC code faster, and every program runs against a simulated machine before it gets anywhere near yours.</p>
     <div class="platforms hero-pl" aria-label="Platforms"><span class="tag">Siemens TIA Portal</span><span class="tag">STEP 7 Classic</span><span class="tag">Allen-Bradley Studio 5000</span><span class="tag">RSLogix 500</span><span class="tag">Ignition SCADA</span></div>
     <div class="acts">
