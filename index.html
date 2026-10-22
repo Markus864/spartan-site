@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spartan Mechatronics | Remote PLC programming, code review and troubleshooting, done faster with AI</title>
+<meta name="description" content="Remote PLC programming, code review, troubleshooting and documentation for system integrators and plants. A mechatronics technician with 12 years on automated lines who uses AI to work faster and tests every program on a simulated machine first. Siemens TIA Portal, STEP 7, Allen-Bradley and Ignition.">
+<meta property="og:title" content="Spartan Mechatronics">
+<meta property="og:description" content="Remote PLC work, done faster with AI and tested on a simulated machine before it reaches yours.">
+<meta property="og:image" content="https://spartanmechatronics.com/assets/logo.png">
+<meta property="og:url" content="https://spartanmechatronics.com/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spartan Mechatronics">
+<meta name="twitter:description" content="Remote PLC work, done faster with AI and tested on a simulated machine before it reaches yours.">
+<meta name="theme-color" content="#d9d9d6">
+<link rel="canonical" href="https://spartanmechatronics.com/">
+<link rel="icon" href="assets/mark.png" type="image/png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ProfessionalService","name":"Spartan Mechatronics LLC","url":"https://spartanmechatronics.com/","logo":"https://spartanmechatronics.com/assets/logo.png","description":"Remote PLC programming, code review, troubleshooting and documentation for system integrators and plants, done faster with AI and tested on a simulated machine first. Siemens TIA Portal, STEP 7, Allen-Bradley Studio 5000 and RSLogix 500, Ignition SCADA.","areaServed":"US","address":{"@type":"PostalAddress","addressRegion":"SC","addressCountry":"US"},"email":"marksplawn@spartanmechatronics.com"}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* the enclosure: RAL 7035 grey outside, white mounting plate inside */
+  --enclosure:#d9d9d6; --plate:#f4f4f2; --plate-2:#e9e9e6; --duct:#bdbdb8; --steel:#a7a7a3;
+  --ink:#0b0b0b; --muted:#4f4f4c; --black:#111111; --black-2:#1f1f1f;
+  --brand:#c1000e; --brand-dark:#8f000a; --lamp-green:#22c55e; --lamp-amber:#f5b20b;
+  --f-plate:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"Barlow",system-ui,sans-serif;
+  --f-tag:"Barlow Condensed","Arial Narrow",sans-serif;
+  --step-small:0.875rem;
+  --step-body:clamp(1.0625rem,1rem + 0.25vw,1.1875rem);
+  --step-lead:clamp(1.25rem,1.1rem + 0.7vw,1.6rem);
+  --step-head:clamp(2.4rem,1.4rem + 3.6vw,4.8rem);
+  --step-display:clamp(2.3rem,0.6rem + 5.2vw,6.4rem);
+  --m:clamp(10px,2vw,28px); --gap:10px; --ease:var(--ease-smooth-out);
+  /* motion tokens (transitions.dev) */
+  --duration-quick:150ms; --duration-fast:250ms; --duration-slow:400ms; --duration-very-slow:500ms;
+  --ease-smooth-out:cubic-bezier(0.22,1,0.36,1); --ease-in-out:ease-in-out;
+  --distance-medium:12px; --blur-medium:3px;
+  /* spacing scale */
+  --s-1:8px; --s-2:16px; --s-3:24px; --s-4:32px; --s-5:48px; --s-6:64px; --s-7:96px; --s-8:128px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{overflow-x:clip}
+body{margin:0;background:var(--enclosure);color:var(--ink);font-family:var(--f-body);font-size:var(--step-body);line-height:1.5;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit}
+h1,h2,h3{font-family:var(--f-plate);font-weight:700;text-transform:uppercase;letter-spacing:0.01em;line-height:.95;margin:0;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+.skip{position:absolute;left:-999px;top:0;background:var(--ink);color:#fff;padding:12px 16px;z-index:10}
+.skip:focus{left:var(--m)}
+:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+[hidden]{display:none!important}
+
+/* wire marker tag: the heat-shrink label on every conductor */
+.tag{display:inline-block;font:700 var(--step-small)/1 var(--f-tag);letter-spacing:0.03em;background:#fff;color:var(--ink);padding:5px 7px 4px;border:2px solid var(--ink);border-radius:3px;white-space:nowrap}
+.tag.red{background:var(--brand);border-color:var(--brand);color:#fff}
+.tag.dark{background:var(--black);border-color:var(--black);color:#fff}
+
+/* engraved nameplate: white letters cut through a black or red plate, two screws */
+.plate{position:relative;display:inline-flex;align-items:center;gap:10px;background:var(--black);color:#fff;font:700 var(--step-body)/1 var(--f-plate);letter-spacing:0.04em;text-transform:uppercase;padding:10px 30px;border-radius:3px}
+.plate::before,.plate::after{content:"";position:absolute;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#6b6b68}
+.plate::before{left:10px}.plate::after{right:10px}
+.plate.red{background:var(--brand)}
+
+/* pilot light */
+.lamp{display:inline-block;width:16px;height:16px;border-radius:50%;background:#5d5d5a;border:3px solid var(--black);flex:none}
+.lamp.on{background:var(--lamp-green);outline:4px solid rgba(34,197,94,.35)}
+.lamp.amber.on{background:var(--lamp-amber);outline:4px solid rgba(245,178,11,.35)}
+.lamp.red.on{background:#ff2a2a;outline:4px solid rgba(255,42,42,.3)}
+
+/* illuminated pushbutton: the call to action */
+.pb{display:inline-flex;align-items:center;gap:14px;text-decoration:none;font:700 var(--step-lead)/1 var(--f-plate);letter-spacing:0.06em;text-transform:uppercase;color:#fff;background:var(--brand);padding:18px 26px 17px 18px;border:0;border-bottom:5px solid var(--brand-dark);border-radius:6px;cursor:pointer;transition:transform .12s var(--ease),background var(--duration-quick) var(--ease-smooth-out)}
+.pb .lens{width:22px;height:22px;border-radius:50%;background:#ff6b6b;border:3px solid #fff;flex:none;transition:background var(--duration-quick) var(--ease-smooth-out)}
+.pb:hover .lens{background:#fff}
+.pb:active{transform:translateY(3px)}
+.pb.black{background:var(--black);border-bottom-color:#000}
+.pb.black .lens{background:var(--lamp-green)}
+
+/* DIN rail and wire duct, drawn as inline SVG strips */
+.rail,.duct{display:block;width:100%}
+.rail{height:22px}
+.duct{height:30px}
+
+/* ---------- header: the panel door ---------- */
+.door-bar{position:sticky;top:0;z-index:6;background:var(--enclosure);padding:10px var(--m)}
+.door-bar .in{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--gap);background:var(--plate);border:3px solid var(--black);border-radius:6px;padding:6px 6px 6px 14px}
+.door-bar .logo img{height:56px;width:auto}
+.door-bar nav{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.door-bar nav a{display:flex;align-items:center;gap:8px;text-decoration:none;font:600 var(--step-small)/1 var(--f-plate);letter-spacing:0.1em;text-transform:uppercase;padding:12px 12px;border-radius:4px;transition:background var(--duration-quick) var(--ease-smooth-out),color var(--duration-quick) var(--ease-smooth-out)}
+.door-bar nav a span{font:600 var(--step-small)/1 var(--f-tag);color:var(--muted)}
+.door-bar nav a:hover{background:var(--black);color:#fff}
+.door-bar nav a:hover span{color:#bbb}
+.door-bar .pb{font-size:var(--step-body);padding:14px 20px 13px 14px}
+.door-bar .pb .lens{width:16px;height:16px}
+
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap);padding:14px var(--m) 0}
+.hero .lead{grid-column:1/8;background:var(--plate);border:3px solid var(--black);border-radius:6px;padding:var(--s-5);display:flex;flex-direction:column;justify-content:space-between;gap:30px;min-height:min(78svh,760px)}
+.hero .ident{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hero h1{font-size:var(--step-display);line-height:.9;letter-spacing:0}
+.hero h1 .l{display:block;white-space:nowrap}
+.hero h1 .l2{color:var(--brand)}
+.hero .sub{font-size:var(--step-lead);line-height:1.35;max-width:40ch}
+.hero .sub{margin-top:auto}
+.hero-pl{margin-top:-8px}
+.hero .acts{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.hero .acts .link{font:600 var(--step-body)/1 var(--f-plate);letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:14px 4px;border-bottom:3px solid var(--ink);transition:color var(--duration-quick) var(--ease-smooth-out),border-color var(--duration-quick) var(--ease-smooth-out)}
+.hero .acts .link:hover{color:var(--brand);border-color:var(--brand)}
+
+/* the panel viewing window holding the 3D cell */
+.window{grid-column:8/13;display:flex;flex-direction:column;gap:var(--gap)}
+.window .bezel{position:relative;flex:1;min-height:420px;background:var(--black);border-radius:10px;padding:16px}
+.window .bezel::before,.window .bezel::after,.window .screws::before,.window .screws::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:#5f5f5c;border:2px solid #2c2c2a;z-index:3}
+.window .bezel::before{top:10px;left:10px}.window .bezel::after{top:10px;right:10px}
+.window .screws::before{bottom:10px;left:10px}.window .screws::after{bottom:10px;right:10px}
+.window .glass{position:relative;width:100%;height:100%;min-height:388px;overflow:hidden;border-radius:4px;background:#f2f2f2}
+.window .glass img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05)}
+.window .status{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between;background:var(--plate);border:3px solid var(--black);border-radius:6px;padding:12px 16px}
+.window .status .lamps{display:flex;gap:16px;align-items:center;font:600 var(--step-small)/1 var(--f-tag)}
+.window .status .lamps span{display:flex;gap:7px;align-items:center}
+.window .status p{font-size:var(--step-body);line-height:1.35;color:var(--muted);max-width:36ch}
+
+/* terminal strip: the jump links to the two buyers */
+.strip{padding:var(--gap) var(--m) 0;display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
+.term{position:relative;display:grid;grid-template-columns:auto 1fr;gap:6px 20px;align-items:start;text-decoration:none;background:var(--black);color:#fff;border-radius:6px;padding:24px 26px 26px;overflow:hidden;transition:background var(--duration-quick) var(--ease-smooth-out)}
+.term.red{background:var(--brand)}
+.term .num{grid-row:1/4;display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--plate);color:var(--ink);border-radius:4px;padding:10px 12px 12px;font:700 var(--step-lead)/1 var(--f-plate)}
+.term .num i{display:block;width:22px;height:22px;border-radius:50%;background:#8d8d89;border:3px solid #3b3b39;position:relative;transition:transform var(--duration-fast) var(--ease-smooth-out)}
+.term .num i::after{content:"";position:absolute;left:2px;right:2px;top:50%;height:3px;margin-top:-1.5px;background:#3b3b39}
+.term:hover .num i{transform:rotate(90deg)}
+.term h2{font-size:var(--step-lead);line-height:1.05;letter-spacing:0.02em}
+.term p{color:#e6e6e6;max-width:46ch}
+.term .go{font:600 var(--step-small)/1 var(--f-plate);letter-spacing:0.12em;text-transform:uppercase;margin-top:8px;display:flex;gap:10px;align-items:center}
+.term .go b{display:inline-block;transition:transform var(--duration-fast) var(--ease-smooth-out)}
+.term:hover .go b{transform:translateX(6px)}
+
+/* ---------- sections ---------- */
+section{margin-top:var(--s-8)}
+.sec{padding:0 var(--m)}
+.sec-head{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap);align-items:end;margin-bottom:28px}
+h2 .dt{display:inline-block;vertical-align:.12em;font-size:.42em;line-height:1;padding:.18em .32em .14em;margin-right:.35em;background:var(--brand);color:#fff;border-radius:4px;letter-spacing:.02em}
+.sec-head h2{grid-column:1/9;font-size:var(--step-head)}
+.sec-head p{grid-column:1/8;font-size:var(--step-lead);line-height:1.38;max-width:50ch;margin-top:14px}
+.sec-head .pb{grid-column:10/13;grid-row:2;justify-self:end;align-self:end}
+
+/* integrators: modules snapped onto a DIN rail */
+.rack{position:relative;background:var(--plate);border:3px solid var(--black);border-radius:6px;padding:22px 18px 26px}
+.rack .rail{position:absolute;left:0;right:0;top:50%;margin-top:-11px}
+.modules{position:relative;display:grid;grid-template-columns:1.25fr 1fr 0.9fr 1.35fr 1fr;gap:8px;align-items:stretch}
+.module.m-dark{background:var(--black);color:#fff;border-color:var(--black)}
+.module.m-dark .face{background:#2b2b2b}
+.module.m-red{background:var(--brand);color:#fff;border-color:var(--brand-dark)}
+.module.m-red .face{background:var(--brand-dark)}
+.module.m-tall{margin-top:-10px;margin-bottom:-10px}
+.module{position:relative;display:flex;flex-direction:column;background:#fbfbfa;border:2px solid var(--black);border-radius:4px;overflow:hidden;min-height:330px}
+.module .face{display:flex;justify-content:space-between;align-items:center;background:var(--black);color:#fff;padding:10px 12px;font:600 var(--step-small)/1 var(--f-tag)}
+.module .body{padding:var(--s-3) var(--s-2);display:grid;grid-template-rows:auto auto 1fr auto;gap:var(--s-2);flex:1}
+.module h3{font-size:var(--step-lead);line-height:1}
+.module p{font-size:var(--step-body);line-height:1.45}
+.module .vent{align-self:end;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.module .vent i{display:block;height:8px;border-radius:2px;background:var(--plate-2)}
+.rack-photo{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap);margin-top:var(--gap)}
+.rack-photo figure{grid-column:1/6;margin:0;position:relative;min-height:300px;border:3px solid var(--black);border-radius:6px;overflow:hidden}
+.rack-photo figure img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05)}
+.rack-photo .note{grid-column:6/13;background:var(--black);color:#fff;border-radius:6px;padding:var(--s-5);display:flex;flex-direction:column;justify-content:space-between;gap:24px}
+.rack-photo .note p{font-size:var(--step-lead);line-height:1.35;max-width:36ch}
+.platforms{display:flex;flex-wrap:wrap;gap:8px}
+.platforms .tag{background:var(--black-2);border-color:#555;color:#fff;padding:7px 9px 6px}
+
+/* plants: the fault log */
+.plants{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap)}
+.plants figure{grid-column:1/6;margin:0;position:relative;min-height:460px;border:3px solid var(--black);border-radius:6px;overflow:hidden}
+.plants figure img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05)}
+.plants figure figcaption{position:absolute;left:12px;bottom:12px}
+.log{grid-column:6/13;background:var(--black);color:#fff;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.log .bar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 8px;font:600 var(--step-small)/1 var(--f-tag);color:#bdbdbd}
+.log .bar b{display:flex;gap:8px;align-items:center;color:#fff;font-weight:500}
+.fault{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;background:var(--black-2);border-radius:4px;padding:18px 18px 20px;transition:background var(--duration-quick) var(--ease-smooth-out)}
+.fault:hover{background:#2a2a2a}
+.fault .code{grid-row:1/3;display:flex;flex-direction:column;align-items:center;gap:var(--s-1);font:600 var(--step-small)/1 var(--f-tag);color:#ff8f8f}
+.fault h3{font-size:var(--step-lead);line-height:1}
+.fault p{color:#dcdcdc;max-width:58ch}
+.log .ack{background:var(--brand);border-radius:4px;padding:18px;font-size:var(--step-lead);line-height:1.3}
+
+/* how every job runs: one ladder rung, power flowing left to right */
+.rung-wrap{background:var(--plate);border:3px solid var(--black);border-radius:6px;padding:var(--s-4)}
+.rung{width:100%;height:auto;display:block;overflow:visible}
+.rung .rl{stroke:var(--ink);stroke-width:6}
+.rung .w{stroke:var(--ink);stroke-width:4;fill:none}
+.rung .flow{stroke:var(--lamp-green);stroke-width:4;fill:none;stroke-dasharray:28 900;stroke-dashoffset:0;animation:flow 4.8s linear infinite}
+@keyframes flow{from{stroke-dashoffset:0}to{stroke-dashoffset:-928}}
+.rung .c{stroke:var(--ink);stroke-width:4;fill:none}
+.rung .cbar{fill:var(--plate);transition:fill var(--duration-quick) var(--ease-smooth-out)}
+.rung .k{animation:close 4.8s linear infinite}
+.rung .k1{animation-delay:0s}.rung .k2{animation-delay:.8s}.rung .k3{animation-delay:1.6s}.rung .k4{animation-delay:2.4s}
+@keyframes close{0%,8%{fill:var(--plate)}12%,88%{fill:var(--lamp-green)}92%,100%{fill:var(--plate)}}
+.rung .coil{stroke:var(--brand);stroke-width:4;fill:none}
+.rung text{font-family:var(--f-plate);font-weight:700;letter-spacing:.06em;fill:var(--ink)}
+.rung .lbl{font-size:30px}
+.rung .sub{font-family:var(--f-tag);font-weight:500;font-size:16px;letter-spacing:0;fill:var(--muted)}
+.rung .addr{font-family:var(--f-tag);font-weight:500;font-size:15px;fill:var(--brand)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap);margin-top:var(--gap)}
+.step .tag,.ai .card .tag{align-self:flex-start;justify-self:start}
+.step{background:var(--plate);border:3px solid var(--black);border-radius:6px;padding:20px 20px 22px;display:flex;flex-direction:column;gap:10px}
+.step h3{font-size:var(--step-lead);line-height:1}
+
+/* AI for your team */
+.ai{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap)}
+.ai .card{grid-column:span 6;display:grid;grid-template-columns:auto 1fr;gap:8px 18px;background:var(--plate);border:3px solid var(--black);border-radius:6px;padding:22px}
+.ai .card .tag{grid-row:1/3;align-self:start}
+.ai .card h3{font-size:var(--step-lead);line-height:1}
+.ai .card.dark{background:var(--black);color:#fff;border-color:var(--black)}
+
+/* questions: a terminal schedule */
+.sched{background:var(--plate);border:3px solid var(--black);border-radius:6px;overflow:hidden}
+.sched .row{display:grid;grid-template-columns:90px minmax(0,5fr) minmax(0,7fr);border-top:3px solid var(--black)}
+.sched .row:first-child{border-top:0}
+.sched .row.hd{background:var(--black);color:#fff;font:600 var(--step-small)/1 var(--f-tag)}
+.sched .row.hd div{padding:12px 16px}
+.sched .t{display:flex;align-items:flex-start;justify-content:center;padding:20px 8px;font:600 var(--step-small)/1 var(--f-tag);background:var(--plate-2)}
+.sched .q{padding:20px 18px;font:600 var(--step-lead)/1.15 var(--f-plate);letter-spacing:0.02em;text-transform:uppercase}
+.sched .a{padding:20px 18px;border-left:3px solid var(--black)}
+
+/* first job: three pushbutton stations */
+.stations{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap)}
+.station{position:relative;display:grid;grid-template-rows:auto auto auto 1fr;justify-items:start;background:var(--plate);border:3px solid var(--black);border-radius:8px;padding:18px 18px 20px;min-height:430px}
+.station .legend{align-self:flex-start}
+.station h3{font-size:var(--step-lead);margin-top:var(--s-3)}
+.station p{margin-top:12px;max-width:34ch}
+.station .press{align-self:end;padding-top:var(--s-3);display:flex;align-items:center;gap:18px;text-decoration:none;font:700 var(--step-body)/1 var(--f-plate);letter-spacing:0.1em;text-transform:uppercase}
+.station .knob{width:74px;height:74px;border-radius:50%;background:var(--black);border:6px solid #9a9a96;flex:none;transition:transform .12s var(--ease)}
+.station.green .knob{background:#1d9a48}
+.station.red .knob{background:var(--brand)}
+.station .press:hover .knob{transform:scale(.96)}
+.station .press:active .knob{transform:scale(.9)}
+
+/* who */
+.who{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap);align-items:stretch}
+.who .txt{grid-column:1/8;background:var(--plate);border:3px solid var(--black);border-radius:6px;padding:var(--s-5);display:flex;flex-direction:column;gap:20px}
+.who h2{font-size:var(--step-head)}
+.who .txt p{font-size:var(--step-lead);line-height:1.4;max-width:46ch}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:auto}
+.facts div{background:var(--black);color:#fff;border-radius:4px;padding:14px 14px 16px;font:600 var(--step-small)/1.3 var(--f-tag);color:#bdbdbd}
+.facts b{display:block;color:#fff;font:700 var(--step-lead)/1 var(--f-plate);letter-spacing:.03em;text-transform:uppercase;margin-bottom:6px}
+.who figure{grid-column:8/13;margin:0;position:relative;background:var(--black);border-radius:10px;padding:16px;overflow:hidden}
+.who figure img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);border-radius:4px;aspect-ratio:1/1}
+
+/* contact: the work order */
+.contact{background:var(--black);color:#fff;padding:var(--s-7) 0 var(--s-7)}
+.contact .inner{padding:0 var(--m);display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap)}
+.contact .ident{grid-column:1/13;display:flex;gap:8px;flex-wrap:wrap}
+.contact h2{grid-column:1/9;font-size:var(--step-head);margin-top:14px}
+.contact .intro{grid-column:1/8;margin-top:14px;font-size:var(--step-lead);color:#d4d4d4;max-width:46ch;overflow-wrap:anywhere}
+.contact .intro a{color:#fff}
+.form{grid-column:1/13;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap);margin-top:var(--s-4)}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{font:600 var(--step-small)/1 var(--f-tag);color:#bdbdbd}
+.field.wide{grid-column:span 2}
+.form input,.form textarea{font:400 var(--step-body)/1.4 var(--f-body);background:var(--black-2);color:#fff;border:2px solid #3a3a3a;border-radius:4px;padding:18px 18px;min-height:64px;resize:vertical;transition:border-color var(--duration-quick) var(--ease-smooth-out),background var(--duration-quick) var(--ease-smooth-out);width:100%}
+.form textarea{min-height:170px}
+.form input::placeholder,.form textarea::placeholder{color:#8f8f8f}
+.form input:focus,.form textarea:focus{border-color:var(--brand);background:#262626;outline:none}
+.form .send{display:flex;flex-direction:column;justify-content:flex-end;gap:8px}
+.form button{width:100%;justify-content:flex-start;font-size:var(--step-lead);min-height:64px}
+.form button:disabled{opacity:.7;cursor:wait}
+.form .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0} /* taste-skill-ignore: off-screen spam trap, not a divider */
+/* invalid field: shake and a red edge that reverts (transitions.dev error state shake) */
+:root{--shake-distance:6px;--shake-overshoot:4px;--shake-dur-a:80ms;--shake-dur-b:60ms;--shake-ease:cubic-bezier(0.22,1,0.36,1);--revert-hold:3000ms;--revert-dur:280ms}
+.form .t-input{will-change:transform}
+.form .t-input.is-error{border-color:var(--brand);transition:border-color var(--revert-dur,280ms) ease-out}
+.form .t-input.is-shaking{animation:t-input-shake calc(var(--shake-dur-a) * 2 + var(--shake-dur-b) * 2) linear}
+@keyframes t-input-shake{
+  0%{transform:translateX(0);animation-timing-function:var(--shake-ease)}
+  28.57%{transform:translateX(var(--shake-distance));animation-timing-function:var(--shake-ease)}
+  57.14%{transform:translateX(calc(var(--shake-distance) * -1));animation-timing-function:var(--shake-ease)}
+  78.57%{transform:translateX(var(--shake-overshoot));animation-timing-function:var(--shake-ease)}
+  100%{transform:translateX(0)}
+}
+.field{position:relative}
+.field .why{position:absolute;right:0;top:0;font:600 var(--step-small)/1 var(--f-tag);color:#ff8f8f;opacity:0;visibility:hidden;transition:opacity var(--revert-dur) ease-out,visibility 0s linear var(--revert-dur)}
+.field.is-error .why{opacity:1;visibility:visible;transition:opacity var(--revert-dur) ease-out,visibility 0s linear 0s}
+/* the reply arrives with a text reveal instead of snapping in */
+.form-msg:not([hidden]){animation:msg-in var(--duration-very-slow) var(--ease-in-out) both}
+@keyframes msg-in{from{opacity:0;transform:translateY(var(--distance-medium));filter:blur(var(--blur-medium))}}
+.form-msg{grid-column:1/13;margin-top:28px;background:var(--black-2);border-radius:4px;padding:24px;font-size:var(--step-lead);line-height:1.35}
+.form-msg.err{border-left:6px solid var(--brand)}
+.form-msg a{color:#fff}
+
+/* footer: the rating plate */
+footer{background:var(--black);color:#fff;padding:0 var(--m) 30px}
+footer .big{display:block;width:min(100%,980px);height:auto}
+.rating{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:var(--s-4);background:#e8e8e5;color:var(--ink);border-radius:6px;overflow:hidden;font:600 var(--step-small)/1.35 var(--f-tag)}
+.rating div{padding:14px 16px;border-left:2px solid var(--black)}
+.rating div:first-child{border-left:0}
+.rating b{display:block;font:700 var(--step-body)/1 var(--f-plate);color:var(--muted);margin-bottom:6px}
+.rating a{text-decoration:none;overflow-wrap:anywhere}
+.foot-links{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;font:600 var(--step-small)/1 var(--f-plate);letter-spacing:.1em;text-transform:uppercase}
+.foot-links a{text-decoration:none;color:#cfcfcf}
+.foot-links a:hover{color:#fff}
+.credits{margin-top:26px;font-size:var(--step-small);color:#9d9d9d;max-width:80ch;overflow-wrap:anywhere}
+.credits a{color:#c4c4c4}
+
+/* hero 3D cell (assets/hero3d.js); the photo stays underneath as the fallback */
+.hero3d{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity var(--duration-slow) var(--ease-in-out)}
+.has-3d .hero3d{opacity:1}
+.glass.has-3d img{opacity:0;transition:opacity var(--duration-slow) var(--ease-in-out)}
+
+/* 3D tilt with glare (transitions.dev card tilt), mouse only */
+:root{--tilt-perspective:1000px;--tilt-return:1000ms;--tilt-return-ease:cubic-bezier(0.22,1,0.36,1);--tilt-follow:400ms;--tilt-follow-ease:cubic-bezier(0.22,1,0.36,1);--tilt-glare-opacity:0.32;--tilt-glare-fade:300ms;--tilt-glare-ease:cubic-bezier(0.22,1,0.36,1)}
+.t-tilt-card{transform:perspective(var(--tilt-perspective)) rotateX(var(--tilt-rx,0deg)) rotateY(var(--tilt-ry,0deg));transform-style:preserve-3d;transition:transform var(--tilt-return) var(--tilt-return-ease),background var(--duration-quick) var(--ease-smooth-out);will-change:transform}
+.t-tilt-card.is-tilting{transition:transform var(--tilt-follow) var(--tilt-follow-ease),background var(--duration-quick) var(--ease-smooth-out)}
+.t-tilt-card>*:not(.t-tilt-glare):not(img){position:relative;z-index:1}
+.t-tilt-glare{position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:screen;z-index:0;border-radius:inherit;background:radial-gradient(circle 95px at var(--tilt-gx,50%) var(--tilt-gy,50%),rgba(255,255,255,0.48),rgba(255,255,255,0.06) 52%,rgba(255,255,255,0) 84%),radial-gradient(circle 220px at var(--tilt-gx,50%) var(--tilt-gy,50%),rgba(255,255,255,0.2),rgba(255,255,255,0) 78%);transition:opacity var(--tilt-glare-fade) var(--tilt-glare-ease)} /* taste-skill-ignore: pointer light, not a fill */
+.t-tilt-card.is-hover .t-tilt-glare{opacity:var(--tilt-glare-opacity)}
+.plate-light .t-tilt-glare{mix-blend-mode:soft-light}
+
+@media (max-width:1100px){
+  .modules{grid-template-columns:1fr}
+  .module{flex-direction:row;min-height:0}
+  .module.m-tall{margin:0}
+  .module .face{flex-direction:column;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);padding:14px 10px}
+  .module .vent{display:none}
+  .rack .rail{display:none}
+  .steps{grid-template-columns:1fr 1fr}
+}
+@media (max-width:1000px){
+  .hero .lead,.window{grid-column:1/13}
+  .hero .lead{min-height:0}
+  .window .bezel{min-height:380px}
+  .sec-head h2,.sec-head p{grid-column:1/13}
+  .sec-head .pb{grid-column:1/13;grid-row:auto;justify-self:start;margin-top:18px}
+  .rack-photo figure,.rack-photo .note,.plants figure,.log{grid-column:1/13}
+  .ai .card{grid-column:1/13}
+  .stations{grid-template-columns:1fr}
+  .station{min-height:0}
+  .who .txt,.who figure{grid-column:1/13}
+  .who figure{max-width:460px}
+  .rating{grid-template-columns:1fr 1fr}
+  .rating div:nth-child(3){border-left:0}
+  .rating div:nth-child(n+3){border-top:2px solid var(--black)}
+}
+@media (max-width:760px){
+  :root{--gap:8px;--s-8:96px;--s-7:64px;--s-5:24px;--s-4:16px}
+  .door-bar nav{display:none}
+  .door-bar .in{grid-template-columns:1fr auto}
+  .door-bar .logo img{height:46px}
+  .hero h1 .l{white-space:normal}
+  .strip{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .sched .row{grid-template-columns:56px 1fr}
+  .sched .a{grid-column:2;border-left:0;padding-top:0}
+  .sched .row.hd div:last-child{display:none}
+  .form{grid-template-columns:1fr}
+  .field.wide{grid-column:auto}
+  .facts{grid-template-columns:1fr 1fr}
+  .rating{grid-template-columns:1fr}
+  .rating div{border-left:0;border-top:2px solid var(--black)}
+  .rating div:first-child{border-top:0}
+  .window .bezel{min-height:300px;padding:12px}
+  .window .glass{min-height:276px}
+  .rung-wrap{overflow-x:auto}
+  .rung{width:760px;max-width:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .form .t-input{animation:none!important;transform:none!important}
+  .form-msg:not([hidden]){animation:none}
+  .rung .flow,.rung .k{animation:none}
+  .rung .k{fill:var(--lamp-green)}
+  .t-tilt-card{transform:none!important;transition:none!important}
+  .hero3d,.term .num i,.term .go b{transition:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="railslots" width="44" height="22" patternUnits="userSpaceOnUse">
+      <rect width="44" height="22" fill="#a7a7a3"/>
+      <rect y="0" width="44" height="4" fill="#8a8a86"/>
+      <rect y="18" width="44" height="4" fill="#8a8a86"/>
+      <rect x="10" y="8" width="24" height="6" rx="3" fill="#6f6f6b"/>
+    </pattern>
+    <pattern id="ductslots" width="26" height="30" patternUnits="userSpaceOnUse">
+      <rect width="26" height="30" fill="#bdbdb8"/>
+      <rect x="9" y="6" width="8" height="18" fill="#a2a29d"/>
+    </pattern>
+  </defs>
+</svg>
+
+<header class="door-bar">
+  <div class="in">
+    <a class="logo" href="#top" aria-label="Spartan Mechatronics, back to top"><img src="assets/logo.png" alt="Spartan Mechatronics" width="801" height="460"></a>
+    <nav aria-label="Main">
+      <a href="#integrators"><span>-A1</span>Integrators</a>
+      <a href="#plants"><span>-A2</span>Plants</a>
+      <a href="#how"><span>-K1</span>How it runs</a>
+      <a href="#ai"><span>-K2</span>AI</a>
+      <a href="#questions"><span>-X1</span>Questions</a>
+      <a href="#start"><span>-S1</span>First job</a>
+    </nav>
+    <a class="pb" href="#contact"><span class="lens" aria-hidden="true"></span>Get a quote</a>
+  </div>
+</header>
+
+<main id="main">
+<div class="hero" id="top">
+  <div class="lead" data-enter>
+    <h1><span class="l">Faster PLC work.</span><span class="l l2">Tested first.</span></h1>
+    <p class="sub">I'm a mechatronics technician with 12 years on automated lines. AI helps me read, write and document PLC code faster, and every program runs against a simulated machine before it gets anywhere near yours.</p>
+    <div class="platforms hero-pl" aria-label="Platforms"><span class="tag">Siemens TIA Portal</span><span class="tag">STEP 7 Classic</span><span class="tag">Allen-Bradley Studio 5000</span><span class="tag">RSLogix 500</span><span class="tag">Ignition SCADA</span></div>
+    <div class="acts">
+      <a class="pb" href="#contact"><span class="lens" aria-hidden="true"></span>Get a quote</a>
+      <a class="link" href="#how">How every job runs</a>
+    </div>
+  </div>
+  <div class="window" data-enter>
+    <div class="bezel">
+      <div class="screws" aria-hidden="true"></div>
+      <div class="glass" data-hero3d><img src="assets/simatic-s7-150.jpg" alt="A Siemens S7-1500 PLC with its status LEDs lit" width="1200" height="1600"></div>
+    </div>
+    <div class="status">
+      <div class="lamps" aria-hidden="true"><span><i class="lamp on"></i>RUN</span><span><i class="lamp amber"></i>HOLD</span><span><i class="lamp red"></i>FAULT</span></div>
+      <p>A simulated palletizer cell. Every program gets a run like this before your crew downloads it.</p>
+    </div>
+  </div>
+</div>
+
+<div class="strip">
+  <a class="term" href="#integrators" data-enter>
+    <span class="num" aria-hidden="true"><i></i>1</span>
+    <h2>Integrators: behind on controls work?</h2>
+    <p>Send a defined piece of the job. It comes back in your standards, under your name.</p>
+    <span class="go">Extra controls capacity <b aria-hidden="true">&rarr;</b></span>
+  </a>
+  <a class="term red" href="#plants" data-enter>
+    <span class="num" aria-hidden="true"><i></i>2</span>
+    <h2>Plants: no controls person on staff?</h2>
+    <p>When the fault lives in the PLC, I work it with your tech over the remote access you already have.</p>
+    <span class="go">When the line stops <b aria-hidden="true">&rarr;</b></span>
+  </a>
+</div>
+
+<section id="integrators" class="sec" aria-labelledby="int-h">
+  <div class="sec-head">
+    <h2 id="int-h"><span class="dt">-A1</span>Extra hands on the controls package</h2>
+    <p>You won the job, the schedule is set, and your controls people are already on three other projects. Hand me a defined piece: a machine, a line section, a set of HMI screens, or a code review before it ships.</p>
+    <a class="pb black" href="#contact" data-job="Integrator package"><span class="lens" aria-hidden="true"></span>Send a package</a>
+  </div>
+  <div class="rack">
+    <svg class="rail" viewBox="0 0 1000 22" preserveAspectRatio="none" aria-hidden="true"><rect width="1000" height="22" fill="url(#railslots)"/></svg>
+    <div class="modules">
+      <div class="module plate-light"><div class="face"><span>-A1.1</span></div><div class="body"><h3>Your standards</h3><p>Send your templates, naming rules and block library. The code comes back looking like your team wrote it, and your engineer reviews it like their own.</p><div class="vent" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
+      <div class="module m-dark"><div class="face"><span>-A1.2</span></div><div class="body"><h3>Faster, same bar</h3><p>AI drafts and cross-checks the code. I go through every rung and every block myself before you see a line of it.</p><div class="vent" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
+      <div class="module plate-light m-tall"><div class="face"><span>-A1.3</span></div><div class="body"><h3>Your name on it</h3><p>I work as part of your team. Your customer deals with you, and the relationship stays yours.</p><div class="vent" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
+      <div class="module m-red"><div class="face"><span>-A1.4</span></div><div class="body"><h3>Proved at a desk</h3><p>Sequences, interlocks and fault paths run against a simulated machine first, so site days go to the problems you can only find in the field.</p><div class="vent" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
+      <div class="module plate-light"><div class="face"><span>-A1.5</span></div><div class="body"><h3>One fixed quote</h3><p>You know what the controls piece costs before it starts, and the margin stays where you bid it.</p><div class="vent" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
+    </div>
+  </div>
+  <div class="rack-photo">
+    <figure><img src="assets/simatic-s7-et-200s-141146.jpg" alt="A row of distributed I/O modules in a control cabinet" width="1600" height="1200" loading="lazy"></figure>
+    <div class="note">
+      <p>Programs written for the tech who has to keep the machine running at the end of the job.</p>
+      <div>
+        <span class="plate red">On the rail</span>
+        <div class="platforms" style="margin-top:12px"><span class="tag">Siemens TIA Portal</span><span class="tag">STEP 7 Classic</span><span class="tag">Allen-Bradley Studio 5000</span><span class="tag">RSLogix 500</span><span class="tag">Ignition SCADA</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="plants" class="sec" aria-labelledby="pl-h">
+  <div class="sec-head">
+    <h2 id="pl-h"><span class="dt">-A2</span>When the PLC stops the line</h2>
+    <p>Your maintenance crew can fix almost anything with a wrench. When the fault is buried in a program nobody on site wrote, waiting weeks for an integrator costs more than the fix. I connect over your remote access, your tech stays at the machine, and we work it together.</p>
+  </div>
+  <div class="plants">
+    <figure><img src="assets/rulolu-akordiyon-konveyor.jpg" alt="A roller conveyor on a warehouse floor" width="1600" height="1207" loading="lazy"><figcaption><span class="tag">-M1 CONVEYOR</span></figcaption></figure>
+    <div class="log" role="list" aria-label="What I take on for plants">
+      <div class="bar" aria-hidden="true"><b><i class="lamp red on"></i>ACTIVE FAULTS</b><span>ACK REQUIRED</span></div>
+      <div class="fault" role="listitem"><span class="code">F-01</span><h3>One fault, one session</h3><p>A scheduled remote session with your tech at the panel. AI helps me get through fault history, trends and old code fast, and you get the cause and the fix in writing.</p></div>
+      <div class="fault" role="listitem"><span class="code">F-02</span><h3>The program nobody understands</h3><p>AI gets through it quickly. I check what it says against your drawings and I/O list, then hand your techs a guide in everyday words to what the machine is supposed to do.</p></div>
+      <div class="fault" role="listitem"><span class="code">F-03</span><h3>Hardware you can't buy anymore</h3><p>Upgrade plans for S7-300/400, SLC 500 and other obsolete PLCs, with cost and downtime laid out before anything gets ordered.</p></div>
+      <div class="fault" role="listitem"><span class="code">F-04</span><h3>Alarms that point at the problem</h3><p>An alarm list your operators can act on, written for the person standing at the machine.</p></div>
+      <p class="ack">Every session ends with your crew knowing what failed and where to look next time.</p>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="sec" aria-labelledby="how-h">
+  <div class="sec-head">
+    <h2 id="how-h"><span class="dt">-K1</span>Four contacts in series</h2>
+    <p>Nothing reaches your machine until all four close. AI makes the first contact fast. The other three are on me.</p>
+  </div>
+  <div class="rung-wrap">
+    <svg class="rung" viewBox="0 0 1200 230" role="img" aria-labelledby="rung-t">
+      <title id="rung-t">A ladder rung: AI draft, tech review, simulation test and your sign-off in series, energizing the release coil.</title>
+      <line class="rl" x1="20" y1="20" x2="20" y2="210"/><line class="rl" x1="1180" y1="20" x2="1180" y2="210"/>
+      <path class="w" d="M20 115 H120 M180 115 H330 M390 115 H540 M600 115 H750 M810 115 H960 M1060 115 H1180"/>
+      <path class="flow" d="M20 115 H1180"/>
+      <g><rect class="cbar k k1" x="136" y="85" width="28" height="60"/><path class="c" d="M120 115 H136 M136 85 V145 M164 85 V145 M164 115 H180"/><text class="addr" x="150" y="64" text-anchor="middle">I0.0</text><text class="lbl" x="150" y="186" text-anchor="middle">AI DRAFT</text><text class="sub" x="150" y="210" text-anchor="middle">first pass, fast</text></g>
+      <g><rect class="cbar k k2" x="346" y="85" width="28" height="60"/><path class="c" d="M330 115 H346 M346 85 V145 M374 85 V145 M374 115 H390"/><text class="addr" x="360" y="64" text-anchor="middle">I0.1</text><text class="lbl" x="360" y="186" text-anchor="middle">TECH REVIEW</text><text class="sub" x="360" y="210" text-anchor="middle">every rung, by me</text></g>
+      <g><rect class="cbar k k3" x="556" y="85" width="28" height="60"/><path class="c" d="M540 115 H556 M556 85 V145 M584 85 V145 M584 115 H600"/><text class="addr" x="570" y="64" text-anchor="middle">I0.2</text><text class="lbl" x="570" y="186" text-anchor="middle">SIM TEST</text><text class="sub" x="570" y="210" text-anchor="middle">simulated machine</text></g>
+      <g><rect class="cbar k k4" x="766" y="85" width="28" height="60"/><path class="c" d="M750 115 H766 M766 85 V145 M794 85 V145 M794 115 H810"/><text class="addr" x="780" y="64" text-anchor="middle">I0.3</text><text class="lbl" x="780" y="186" text-anchor="middle">YOUR OK</text><text class="sub" x="780" y="210" text-anchor="middle">you sign off</text></g>
+      <g><path class="coil" d="M985 85 Q962 115 985 145 M1035 85 Q1058 115 1035 145"/><path class="w" d="M960 115 H975 M1045 115 H1060"/><text class="addr" x="1010" y="64" text-anchor="middle">Q0.0</text><text class="lbl" x="1010" y="186" text-anchor="middle" fill="#c1000e">RELEASE</text><text class="sub" x="1010" y="210" text-anchor="middle">to your machine</text></g>
+    </svg>
+  </div>
+  <div class="steps">
+    <div class="step"><span class="tag">I0.0</span><h3>AI draft</h3><p>AI writes the first pass of code, documentation or a review from your spec, standards and drawings.</p></div>
+    <div class="step"><span class="tag">I0.1</span><h3>Tech review</h3><p>I read every rung and every block against the machine and the sequence, and fix what AI got wrong.</p></div>
+    <div class="step"><span class="tag">I0.2</span><h3>Sim test</h3><p>The program runs against a simulated machine: sequences, interlocks, fault paths. You get the test report.</p></div>
+    <div class="step"><span class="tag red">I0.3</span><h3>Your OK</h3><p>Nothing goes to a real machine, and nothing changes on a running line, until you sign off.</p></div>
+  </div>
+</section>
+
+<section id="ai" class="sec" aria-labelledby="ai-h">
+  <div class="sec-head">
+    <h2 id="ai-h"><span class="dt">-K2</span>Put AI to work on your own controls</h2>
+    <p>Your engineers and techs can use AI on controls work today. It saves real hours on documentation and review, and it also gets PLC logic wrong with total confidence. I show your team where it helps and how to catch it.</p>
+    <a class="pb black" href="#contact" data-job="AI working session"><span class="lens" aria-hidden="true"></span>Ask about a session</a>
+  </div>
+  <div class="ai">
+    <div class="card"><span class="tag">-K2.1</span><h3>Read and explain old code</h3><p>Get a section-by-section explanation of a program, then check it against the machine before anyone trusts it.</p></div>
+    <div class="card"><span class="tag">-K2.2</span><h3>Review before it ships</h3><p>Prompts and checklists that use AI as a second set of eyes on logic, interlocks, alarms and naming.</p></div>
+    <div class="card"><span class="tag">-K2.3</span><h3>Where AI gets controls wrong</h3><p>The mistakes it makes on PLC work, with real examples, so your people know what to double-check.</p></div>
+    <div class="card dark"><span class="tag red">-K2.4</span><h3>A working session with your team</h3><p>Remote, on your own programs and platforms, so the habits stick after the call ends.</p></div>
+  </div>
+</section>
+
+<section id="questions" class="sec" aria-labelledby="q-h">
+  <div class="sec-head">
+    <h2 id="q-h"><span class="dt">-X1</span>What buyers ask first</h2>
+  </div>
+  <div class="sched">
+    <div class="row hd" aria-hidden="true"><div>TERM</div><div>QUESTION</div><div>ANSWER</div></div>
+    <div class="row"><span class="t">X1:1</span><p class="q">Will you work under our company name?</p><p class="a">Yes. On integrator jobs your customer deals with you.</p></div>
+    <div class="row"><span class="t">X1:2</span><p class="q">Do you sign an NDA?</p><p class="a">Yes, before any files or access change hands.</p></div>
+    <div class="row"><span class="t">X1:3</span><p class="q">Who owns the code?</p><p class="a">You do, along with every file and document from the job.</p></div>
+    <div class="row"><span class="t">X1:4</span><p class="q">How do you work on a machine you can't drive to?</p><p class="a">Over the remote access your site already has (VPN, Secomea, eWON, TeamViewer), or from program files and photos. Your people stay at the machine, and nothing changes on a running line without your OK.</p></div>
+    <div class="row"><span class="t">X1:5</span><p class="q">Does my code go into AI tools?</p><p class="a">Only with your OK. Before any files change hands we agree which tools, if any, can see them, and nothing goes into a tool that trains on customer data.</p></div>
+    <div class="row"><span class="t">X1:6</span><p class="q">Which platforms?</p><p class="a">Siemens TIA Portal and STEP 7 Classic, Allen-Bradley Studio 5000 and RSLogix 500, and Ignition SCADA.</p></div>
+  </div>
+</section>
+
+<section id="start" class="sec" aria-labelledby="start-h">
+  <div class="sec-head">
+    <h2 id="start-h"><span class="dt">-S1</span>Start with one small job</h2>
+    <p>A fixed price for a defined job. You see how the work comes back before you hand me anything bigger.</p>
+  </div>
+  <div class="stations">
+    <div class="station green plate-light">
+      <span class="plate legend">-S1.1 Troubleshoot</span>
+      <h3>Troubleshooting session</h3>
+      <p>One fault, a scheduled remote session with your tech at the panel, and the cause and fix in writing.</p>
+      <a class="press" href="#contact" data-job="Troubleshooting session"><span class="knob" aria-hidden="true"></span>Get a quote</a>
+    </div>
+    <div class="station plate-light">
+      <span class="plate legend">-S1.2 Review</span>
+      <h3>Code review</h3>
+      <p>One program checked end to end: logic, interlocks, alarms, naming and fault handling. Issues ranked by risk, with the fix for each.</p>
+      <a class="press" href="#contact" data-job="Code review"><span class="knob" aria-hidden="true"></span>Get a quote</a>
+    </div>
+    <div class="station red plate-light">
+      <span class="plate red legend">-S1.3 Document</span>
+      <h3>Program documentation</h3>
+      <p>One program explained in everyday words for your crew: what each section does, the I/O, the sequences, the interlocks, and the parts that are dead or risky.</p>
+      <a class="press" href="#contact" data-job="Program documentation"><span class="knob" aria-hidden="true"></span>Get a quote</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="who-h">
+  <div class="who">
+    <div class="txt">
+      <h2 id="who-h"><span class="dt">-P1</span>Mark Splawn</h2>
+      <p>Mechatronics technician. Twelve years on automated lines: robot cells, conveyors, drives, pneumatics, sensors and the PLCs that run them. I build AI workflows for controls work and teach them to techs, and every program still gets written for the person who has to keep it running.</p>
+      <div class="facts">
+        <div><b>12 years</b>on automated lines</div>
+        <div><b>South Carolina</b>home base</div>
+        <div><b>Remote</b>anywhere in the US</div>
+      </div>
+    </div>
+    <figure>
+      <img src="assets/mark-splawn.jpg" alt="Mark Splawn" width="400" height="400" loading="lazy">
+    </figure>
+  </div>
+</section>
+
+<svg class="duct" viewBox="0 0 1000 30" preserveAspectRatio="none" aria-hidden="true" style="margin-top:var(--s-8)"><rect width="1000" height="30" fill="url(#ductslots)"/></svg>
+<section class="contact" id="contact" aria-labelledby="contact-h" style="margin-top:0">
+  <div class="inner">
+    <h2 id="contact-h"><span class="dt">-W1</span>Tell me what's stuck</h2>
+    <p class="intro">The machine, the PLC platform, what you need and when. You'll get next steps and a quote by email. You can also write to <a href="mailto:marksplawn@spartanmechatronics.com">marksplawn@spartanmechatronics.com</a>.</p>
+    <form class="form" id="job" novalidate>
+      <div class="field"><label for="f-name">NAME</label><span class="why" aria-live="polite">Add your name</span><input name="name" id="f-name" class="t-input" placeholder="Your name" autocomplete="name" required></div>
+      <div class="field"><label for="f-company">COMPANY</label><input name="company" id="f-company" placeholder="Company" autocomplete="organization"></div>
+      <div class="field"><label for="f-email">EMAIL</label><span class="why" aria-live="polite">That email looks off</span><input name="email" id="f-email" class="t-input" type="email" placeholder="Email" autocomplete="email" required></div>
+      <div class="field wide"><label for="f-job">THE JOB</label><span class="why" aria-live="polite">Tell me about the job</span><textarea name="job" id="f-job" class="t-input" placeholder="The machine, the PLC platform, what you need and when" required></textarea></div>
+      <div class="send"><button type="submit" class="pb"><span class="lens" aria-hidden="true"></span>Send it</button></div>
+      <input class="hp" name="website" id="f-website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    </form>
+    <p class="form-msg" id="job-msg" role="status" hidden></p>
+  </div>
+</section>
+</main>
+
+<footer>
+  <img class="big" src="assets/logo-on-dark.png" alt="Spartan Mechatronics" width="801" height="460" loading="lazy">
+  <div class="rating">
+    <div><b>Mfr</b>Spartan Mechatronics LLC</div>
+    <div><b>Location</b>South Carolina, USA</div>
+    <div><b>Service</b>Remote PLC and controls work</div>
+    <div><b>Contact</b><a href="mailto:marksplawn@spartanmechatronics.com">marksplawn@spartanmechatronics.com</a></div>
+  </div>
+  <div class="foot-links"><a href="#integrators">Integrators</a><a href="#plants">Plants</a><a href="#how">How it runs</a><a href="#ai">AI</a><a href="#questions">Questions</a><a href="#start">First job</a><a href="#contact">Contact</a></div>
+  <p class="credits">Photos: <a href="https://commons.wikimedia.org/w/index.php?curid=154795329">"SIMATIC S7-150"</a> by Oleg Yunakov, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>; <a href="https://commons.wikimedia.org/w/index.php?curid=26797214">"SIMATIC S7 ET 200S"</a> by Mixabest, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; <a href="https://commons.wikimedia.org/w/index.php?curid=142988646">"Rulolu Akordiyon Konveyor"</a> by Metaroller, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Via Wikimedia Commons, shown in greyscale.</p>
+</footer>
+
+<script src="assets/vendor/gsap.min.js"></script>
+<script>
+document.documentElement.classList.add('js');
+(function(){
+  document.querySelectorAll('a[data-job]').forEach(a=>a.addEventListener('click',()=>{
+    const t=document.getElementById('f-job');if(!t.value.trim())t.value=a.dataset.job+': ';
+    setTimeout(()=>document.getElementById('f-name').focus({preventScroll:true}),400);
+  }));
+})();
+(function(){
+  // Quote requests go to the HubSpot form "Website quote request (spartanmechatronics.com)"
+  const HS='https://api.hsforms.com/submissions/v3/integration/submit/246313477/dd51fef0-786d-4097-bc46-93b11a413801';
+  const form=document.getElementById('job'),msg=document.getElementById('job-msg'),btn=form.querySelector('button');
+  const label=btn.innerHTML;
+  const v=id=>document.getElementById(id).value.trim();
+  const esc=t=>t.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const holdMs=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--revert-hold'))||3000;
+  function flag(id){
+    // shake the field, mark it red with a reason and focus it; the mark reverts on its own
+    const el=document.getElementById(id),wrap=el.closest('.field');
+    el.classList.remove('is-shaking');void el.offsetWidth;
+    el.classList.add('is-shaking','is-error');wrap.classList.add('is-error');
+    el.addEventListener('animationend',()=>el.classList.remove('is-shaking'),{once:true});
+    clearTimeout(el._t);el._t=setTimeout(()=>{el.classList.remove('is-error');wrap.classList.remove('is-error')},holdMs);
+    el.focus();
+  }
+  const show=(html,err)=>{msg.innerHTML=html;msg.hidden=false;msg.classList.toggle('err',!!err)};
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const name=v('f-name'),company=v('f-company'),email=v('f-email'),job=v('f-job');
+    if(!name)return flag('f-name');
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return flag('f-email');
+    if(!job)return flag('f-job');
+    if(v('f-website')){form.hidden=true;show('Thanks. I\'ll reply by email with next steps.');return}
+    const parts=name.split(/\s+/),first=parts.shift(),last=parts.join(' ');
+    const fields=[{name:'firstname',value:first},{name:'email',value:email},
+      {name:'message',value:(company?'Company: '+company+'\n\n':'')+job}];
+    if(last)fields.push({name:'lastname',value:last});
+    btn.disabled=true;btn.textContent='Sending...';
+    try{
+      const r=await fetch(HS,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({fields,context:{pageUri:location.href,pageName:document.title}})});
+      if(!r.ok)throw new Error(r.status);
+      form.hidden=true;
+      show('Thanks, '+esc(first)+'. I got it and will reply to '+esc(email)+' with next steps and a quote.');
+    }catch(err){
+      btn.disabled=false;btn.innerHTML=label;
+      show('That didn\'t go through. Please email <a href="mailto:marksplawn@spartanmechatronics.com?subject=Controls%20job">marksplawn@spartanmechatronics.com</a> instead.',true);
+    }
+  });
+})();
+(function(){
+  // Load entrance: plays once, above the fold, nothing waits on a scroll.
+  // Without GSAP (blocked or failed) everything simply shows.
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches||!window.gsap)return;
+  // tokens: text reveal 500ms / 12px / 3px blur, one 80ms stagger; power4.out = cubic-bezier(.22,1,.36,1)
+  gsap.timeline({defaults:{ease:'power4.out',duration:0.5}})
+    .from('.hero .lead > *',{autoAlpha:0,y:12,filter:'blur(3px)',stagger:0.08,clearProps:'all'})
+    .from('.window',{autoAlpha:0,rotateY:-14,x:30,transformPerspective:1200,transformOrigin:'right center',clearProps:'all'},'-=0.45')
+    .from('.strip',{autoAlpha:0,y:12,clearProps:'all'},'-=0.3');
+})();
+(function(){
+  // 3D tilt toward the pointer with a light glare (transitions.dev card tilt), mouse only
+  if(!matchMedia('(hover: hover) and (pointer: fine)').matches||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const MAX=9;
+  document.querySelectorAll('.term,.module,.station,.fault,.rack-photo figure,.plants figure,.who figure,.ai .card').forEach(card=>{
+    card.classList.add('t-tilt-card');
+    if(getComputedStyle(card).position==='static')card.style.position='relative';
+    card.style.overflow='hidden';
+    const g=document.createElement('span');g.className='t-tilt-glare';g.setAttribute('aria-hidden','true');card.appendChild(g);
+    const reset=()=>{card.classList.remove('is-hover','is-tilting');card.style.setProperty('--tilt-rx','0deg');card.style.setProperty('--tilt-ry','0deg')};
+    card.addEventListener('pointermove',e=>{
+      const r=card.getBoundingClientRect();
+      const px=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),py=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height));
+      const k=Math.min(1,320/Math.max(r.width,r.height)); // big panels lean less
+      card.classList.add('is-hover','is-tilting');
+      card.style.setProperty('--tilt-ry',((px-.5)*MAX*k*1.6).toFixed(2)+'deg');
+      card.style.setProperty('--tilt-rx',((.5-py)*MAX*k*1.6).toFixed(2)+'deg');
+      card.style.setProperty('--tilt-gx',(px*100).toFixed(1)+'%');
+      card.style.setProperty('--tilt-gy',(py*100).toFixed(1)+'%');
+    });
+    card.addEventListener('pointerleave',reset);
+  });
+})();
+(function(){
+  // the window's pilot lamps follow the 3D cell: HOLD while a full pallet swaps out
+  const run=document.querySelector('.window .lamp:not(.amber):not(.red)'),hold=document.querySelector('.window .lamp.amber');
+  document.addEventListener('cellstate',e=>{run.classList.toggle('on',e.detail==='run');hold.classList.toggle('on',e.detail==='hold')});
+})();
+</script>
+<script type="module" src="assets/hero3d.js"></script>
+</body>
+</html>
