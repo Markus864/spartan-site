@@ -27,6 +27,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[{"@type":"ProfessionalService","@id":"https://spartanmechatronics.com/#business","name":"Spartan Mechatronics LLC","alternateName":"Spartan Mechatronics","url":"https://spartanmechatronics.com/","logo":"https://spartanmechatronics.com/assets/logo.png","image":"https://spartanmechatronics.com/assets/og-image.png","description":"Contract PLC programming, code review, troubleshooting and documentation for integrators and plants. Siemens, Allen-Bradley, Ignition. Sim-tested first.","email":"marksplawn@spartanmechatronics.com","address":{"@type":"PostalAddress","addressRegion":"SC","addressCountry":"US"},"areaServed":{"@type":"Country","name":"United States"},"knowsAbout":["PLC programming","Siemens TIA Portal","Siemens STEP 7","S7-1500","S7-300/400","Allen-Bradley Studio 5000","RSLogix 500","ControlLogix","CompactLogix","Ignition SCADA","HMI programming","PLC troubleshooting","PLC migration","AI-assisted PLC programming"],"hasOfferCatalog":{"@type":"OfferCatalog","name":"Remote controls services","itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"PLC programming services","description":"PLC and HMI programming from a spec or functional description, built to the integrator's standards.","areaServed":"US","provider":{"@id":"https://spartanmechatronics.com/#business"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"PLC code review","description":"One program checked end to end: logic, interlocks, alarms, naming and fault handling, issues ranked by risk.","areaServed":"US","provider":{"@id":"https://spartanmechatronics.com/#business"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Remote PLC troubleshooting","description":"A scheduled remote session with the plant's tech at the panel, with the cause and fix in writing.","areaServed":"US","provider":{"@id":"https://spartanmechatronics.com/#business"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"PLC programming documentation","description":"A program explained in everyday words: sections, I/O, sequences, interlocks.","areaServed":"US","provider":{"@id":"https://spartanmechatronics.com/#business"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"PLC migration planning","description":"Upgrade plans for S7-300/400 to S7-1500 and SLC 500 to ControlLogix or CompactLogix, with cost and downtime laid out.","areaServed":"US","provider":{"@id":"https://spartanmechatronics.com/#business"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Simulation testing (virtual FAT)","description":"Sequences, interlocks and fault paths run against a simulated machine before site.","areaServed":"US","provider":{"@id":"https://spartanmechatronics.com/#business"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"AI for controls teams","description":"Working sessions that teach a controls team where AI helps on PLC work and how to catch it when it is wrong.","areaServed":"US","provider":{"@id":"https://spartanmechatronics.com/#business"}}}]}},{"@type":"WebSite","@id":"https://spartanmechatronics.com/#website","url":"https://spartanmechatronics.com/","name":"Spartan Mechatronics","publisher":{"@id":"https://spartanmechatronics.com/#business"},"inLanguage":"en-US"},{"@type":"FAQPage","@id":"https://spartanmechatronics.com/#faq","mainEntity":[{"@type":"Question","name":"Will you work under our company name?","acceptedAnswer":{"@type":"Answer","text":"Yes. On integrator jobs your customer deals with you."}},{"@type":"Question","name":"Do you sign an NDA?","acceptedAnswer":{"@type":"Answer","text":"Yes, before any files or access change hands."}},{"@type":"Question","name":"Who owns the code?","acceptedAnswer":{"@type":"Answer","text":"You do, along with every file and document from the job."}},{"@type":"Question","name":"How do you work on a machine you can't drive to?","acceptedAnswer":{"@type":"Answer","text":"Over the remote access your site already has (VPN, Secomea, eWON, TeamViewer), or from program files and photos. Your people stay at the machine, and nothing changes on a running line without your OK."}},{"@type":"Question","name":"Does my code go into AI tools?","acceptedAnswer":{"@type":"Answer","text":"Only with your OK. Before any files change hands we agree which tools, if any, can see them, and nothing goes into a tool that trains on customer data."}},{"@type":"Question","name":"Which platforms?","acceptedAnswer":{"@type":"Answer","text":"Siemens TIA Portal and STEP 7 Classic, Allen-Bradley Studio 5000 and RSLogix 500, and Ignition SCADA."}}]}]}
 </script>
+<script>document.documentElement.classList.add('js')</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -63,6 +64,9 @@ p{margin:0;text-wrap:pretty}
 .skip{position:absolute;left:-999px;top:0;background:var(--ink);color:#fff;padding:12px 16px;z-index:10}
 .skip:focus{left:var(--m)}
 :focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+/* on black and red panels the red ring disappears: amber (10:1 on black) instead */
+.contact :focus-visible,footer :focus-visible,.term:focus-visible,.rack-photo .note :focus-visible,.log :focus-visible,.ai .card.dark :focus-visible,.module.m-dark :focus-visible,.module.m-red :focus-visible,.facts :focus-visible{outline-color:var(--lamp-amber)}
+.term.red:focus-visible{outline-color:var(--ink)}
 [hidden]{display:none!important}
 
 /* wire marker tag: the heat-shrink label on every conductor */
@@ -106,6 +110,12 @@ p{margin:0;text-wrap:pretty}
 .door-bar nav a:hover span{color:#bbb}
 .door-bar .pb{font-size:var(--step-body);padding:14px 20px 13px 14px}
 .door-bar .pb .lens{width:16px;height:16px}
+.door-bar .in{position:relative}
+.menu-btn{display:none;align-items:center;gap:10px;font:600 var(--step-small)/1 var(--f-plate);letter-spacing:0.1em;text-transform:uppercase;color:var(--ink);background:none;border:2px solid var(--black);border-radius:4px;padding:12px 12px;min-height:48px;cursor:pointer}
+.menu-btn .bars,.menu-btn .bars::before,.menu-btn .bars::after{display:block;width:18px;height:2px;background:currentColor;position:relative}
+.menu-btn .bars::before,.menu-btn .bars::after{content:"";position:absolute;left:0}
+.menu-btn .bars::before{top:-6px}.menu-btn .bars::after{top:6px}
+.menu-btn[aria-expanded="true"]{background:var(--black);color:#fff}
 
 /* ---------- hero ---------- */
 .hero{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap);padding:14px var(--m) 0}
@@ -275,10 +285,12 @@ h2 .dt{display:inline-block;vertical-align:.12em;font-size:.42em;line-height:1;p
 .form input,.form textarea{font:400 var(--step-body)/1.4 var(--f-body);background:var(--black-2);color:#fff;border:2px solid #3a3a3a;border-radius:4px;padding:18px 18px;min-height:64px;resize:vertical;transition:border-color var(--duration-quick) var(--ease-smooth-out),background var(--duration-quick) var(--ease-smooth-out);width:100%}
 .form textarea{min-height:170px}
 .form input::placeholder,.form textarea::placeholder{color:#8f8f8f}
-.form input:focus,.form textarea:focus{border-color:var(--brand);background:#262626;outline:none}
+.form input:focus,.form textarea:focus{border-color:#fff;background:#262626;outline:3px solid var(--lamp-amber);outline-offset:2px}
 .form .send{display:flex;flex-direction:column;justify-content:flex-end;gap:8px}
 .form button{width:100%;justify-content:flex-start;font-size:var(--step-lead);min-height:64px}
 .form button:disabled{opacity:.7;cursor:wait}
+.form-note{grid-column:1/-1;font-size:var(--step-small);color:#bdbdbd}
+.form-note a{color:#fff}
 .form .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0} /* taste-skill-ignore: off-screen spam trap, not a divider */
 /* invalid field: shake and a red edge that reverts (transitions.dev error state shake) */
 :root{--shake-distance:6px;--shake-overshoot:4px;--shake-dur-a:80ms;--shake-dur-b:60ms;--shake-ease:cubic-bezier(0.22,1,0.36,1);--revert-hold:3000ms;--revert-dur:280ms}
@@ -357,8 +369,11 @@ footer .big{display:block;width:min(100%,980px);height:auto}
 }
 @media (max-width:760px){
   :root{--gap:8px;--s-8:96px;--s-7:64px;--s-5:24px;--s-4:16px}
-  .door-bar nav{display:none}
-  .door-bar .in{grid-template-columns:1fr auto}
+  .js .menu-btn{display:inline-flex}
+  .js .door-bar nav{display:none;position:absolute;top:calc(100% + 6px);left:-3px;right:-3px;flex-direction:column;gap:2px;background:var(--plate);border:3px solid var(--black);border-radius:6px;padding:6px}
+  .js .door-bar nav.is-open{display:flex}
+  .door-bar nav a{padding:16px 12px}
+  .door-bar .in{grid-template-columns:1fr auto auto}
   .door-bar .logo img{height:46px}
   .strip{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr}
@@ -407,7 +422,8 @@ footer .big{display:block;width:min(100%,980px);height:auto}
 <header class="door-bar">
   <div class="in">
     <a class="logo" href="#top" aria-label="Spartan Mechatronics, back to top"><img src="assets/logo.png" alt="Spartan Mechatronics" width="801" height="460"></a>
-    <nav aria-label="Main">
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav"><span class="bars" aria-hidden="true"></span>Menu</button>
+    <nav aria-label="Main" id="site-nav">
       <a href="#integrators"><span>-A1</span>Integrators</a>
       <a href="#plants"><span>-A2</span>Plants</a>
       <a href="#how"><span>-K1</span>How it runs</a>
@@ -613,6 +629,7 @@ footer .big{display:block;width:min(100%,980px);height:auto}
       <div class="field"><label for="f-email">EMAIL</label><span class="why" aria-live="polite">That email looks off</span><input name="email" id="f-email" class="t-input" type="email" placeholder="Email" autocomplete="email" required></div>
       <div class="field wide"><label for="f-job">THE JOB</label><span class="why" aria-live="polite">Tell me about the job</span><textarea name="job" id="f-job" class="t-input" placeholder="The machine, the PLC platform, what you need and when" required></textarea></div>
       <div class="send"><button type="submit" class="pb"><span class="lens" aria-hidden="true"></span>Send it</button></div>
+      <p class="form-note">We use this only to reply to your request. See our <a href="privacy.html">Privacy Policy</a>.</p>
       <input class="hp" name="website" id="f-website" tabindex="-1" autocomplete="off" aria-hidden="true">
     </form>
     <p class="form-msg" id="job-msg" role="status" hidden></p>
@@ -628,13 +645,12 @@ footer .big{display:block;width:min(100%,980px);height:auto}
     <div><b>Service</b>Remote PLC and controls work</div>
     <div><b>Contact</b><a href="mailto:marksplawn@spartanmechatronics.com">marksplawn@spartanmechatronics.com</a></div>
   </div>
-  <div class="foot-links"><a href="#integrators">Integrators</a><a href="#plants">Plants</a><a href="#how">How it runs</a><a href="#ai">AI</a><a href="#questions">Questions</a><a href="#start">First job</a><a href="#contact">Contact</a></div>
+  <div class="foot-links"><a href="#integrators">Integrators</a><a href="#plants">Plants</a><a href="#how">How it runs</a><a href="#ai">AI</a><a href="#questions">Questions</a><a href="#start">First job</a><a href="#contact">Contact</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div>
   <p class="credits">Photos: <a href="https://commons.wikimedia.org/w/index.php?curid=154795329">"SIMATIC S7-150"</a> by Oleg Yunakov, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>; <a href="https://commons.wikimedia.org/w/index.php?curid=26797214">"SIMATIC S7 ET 200S"</a> by Mixabest, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; <a href="https://commons.wikimedia.org/w/index.php?curid=142988646">"Rulolu Akordiyon Konveyor"</a> by Metaroller, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Via Wikimedia Commons, shown in greyscale.</p>
 </footer>
 
 <script src="assets/vendor/gsap.min.js"></script>
 <script>
-document.documentElement.classList.add('js');
 (function(){
   document.querySelectorAll('a[data-job]').forEach(a=>a.addEventListener('click',()=>{
     const t=document.getElementById('f-job');if(!t.value.trim())t.value=a.dataset.job+': ';
@@ -715,6 +731,15 @@ document.documentElement.classList.add('js');
     });
     card.addEventListener('pointerleave',reset);
   });
+})();
+(function(){
+  // phone menu: the nav folds behind a button under 760px
+  const btn=document.querySelector('.menu-btn'),nav=document.getElementById('site-nav');
+  const set=open=>{btn.setAttribute('aria-expanded',String(open));nav.classList.toggle('is-open',open)};
+  btn.addEventListener('click',()=>set(btn.getAttribute('aria-expanded')!=='true'));
+  nav.addEventListener('click',e=>{if(e.target.closest('a'))set(false)});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&nav.classList.contains('is-open')){set(false);btn.focus()}});
+  document.addEventListener('click',e=>{if(nav.classList.contains('is-open')&&!e.target.closest('.door-bar'))set(false)});
 })();
 (function(){
   // the window's pilot lamps follow the 3D cell: HOLD while a full pallet swaps out
