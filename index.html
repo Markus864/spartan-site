@@ -662,7 +662,7 @@ footer .big{display:block;width:min(100%,980px);height:auto}
   const HS='https://api.hsforms.com/submissions/v3/integration/submit/246313477/dd51fef0-786d-4097-bc46-93b11a413801';
   // ...and to the lead logger (red-tip-automation/integrations/lead-logger), which tags the
   // HubSpot contact Spartan / Form and emails Markus. Empty = HubSpot only.
-  const LOGGER='';
+  const LOGGER='https://script.google.com/macros/s/AKfycbzySp4lg6zygL9EmyQZ0FVmUsZ45Wp6ZLntkTydyCAIjbyXO8sxis-8q0hqx0-9v6jgjg/exec?brand=spartan&source=form';
   const form=document.getElementById('job'),msg=document.getElementById('job-msg'),btn=form.querySelector('button');
   const label=btn.innerHTML;
   const v=id=>document.getElementById(id).value.trim();
